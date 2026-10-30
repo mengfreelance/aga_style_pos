@@ -6,7 +6,6 @@ vendor/
 # Build outputs
 dist/
 build/
-*.php
 
 # Environment files
 .env
