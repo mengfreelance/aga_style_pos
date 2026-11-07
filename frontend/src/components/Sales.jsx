@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, CreditCard, Plus, Search, Trash2, ChevronLeft, Users } from 'lucide-react';
+import { ShoppingCart, CreditCard, Plus, Search, Trash2, ChevronLeft, Users, Image as ImageIcon } from 'lucide-react';
 import api from '../services/api';
 
 const CURRENCY_RATES = { USD: 1, KHR: 4100 };
@@ -12,10 +12,15 @@ export default function Sales() {
   const [currency, setCurrency] = useState('USD');
   const [amountTendered, setAmountTendered] = useState('');
   const [loading, setLoading] = useState(true);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [filterSize, setFilterSize] = useState('');
+  const [filterColor, setFilterColor] = useState('');
+  const [filterPrice, setFilterPrice] = useState('');
+  const [filterGender, setFilterGender] = useState('');
+
+  const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
   useEffect(() => {
     Promise.all([
@@ -30,11 +35,36 @@ export default function Sales() {
 
   const variantOptions = variants.map((v) => {
     const p = products.find((p) => p.id === v.product_id);
+    const imageUrl = p?.image_url || `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&h=200&fit=crop`;
     return {
       ...v,
       label: `${p?.name ?? 'Unknown'} — ${v.size} / ${v.color}`,
+      imageUrl,
     };
   });
+
+  const uniqueSizes = [...new Set(variants.map((v) => v.size))].sort();
+  const uniqueColors = [...new Set(variants.map((v) => v.color))].sort();
+
+  const filteredVariants = variantOptions.filter((v) => {
+    if (filterSize && v.size !== filterSize) return false;
+    if (filterColor && v.color !== filterColor) return false;
+    if (filterGender) {
+      const genderLower = filterGender.toLowerCase();
+      const labelLower = v.label.toLowerCase();
+      if (!labelLower.includes(genderLower)) return false;
+    }
+    if (filterPrice) {
+      const price = Number(v.selling_price);
+      if (filterPrice === 'under-20' && price >= 20) return false;
+      if (filterPrice === '20-50' && (price < 20 || price > 50)) return false;
+      if (filterPrice === '50-100' && (price < 50 || price > 100)) return false;
+      if (filterPrice === 'over-100' && price <= 100) return false;
+    }
+    return true;
+  });
+
+  const hasActiveFilter = filterSize || filterColor || filterPrice || filterGender;
 
   const subtotal = cart.reduce((sum, item) => sum + Number(item.total || 0), 0);
   const total = subtotal;
@@ -45,6 +75,8 @@ export default function Sales() {
     const variant = variants.find((v) => v.id === variantId);
     if (!variant) return;
     const existing = cart.find((item) => item.variant_id === variantId);
+    const p = products.find((p) => p.id === variant.product_id);
+    const imageUrl = p?.image_url || `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&h=200&fit=crop`;
     if (existing) {
       setCart(cart.map((item) =>
         item.variant_id === variantId
@@ -61,6 +93,7 @@ export default function Sales() {
         quantity: 1,
         unit_price: Number(variant.selling_price),
         total: Number(variant.selling_price),
+        imageUrl,
       }]);
     }
   };
@@ -114,7 +147,6 @@ export default function Sales() {
       setReceipt(res);
       setShowReceipt(true);
       clearCart();
-      setCheckoutOpen(false);
     } catch (err) {
       alert('Checkout failed: ' + (err.response?.data?.error ?? 'Unknown error'));
     } finally {
@@ -145,11 +177,72 @@ export default function Sales() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
-        {/* Left: Product Search & Cart */}
-        <div className="lg:col-span-7 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[650px]">
+        {/* Left: Product Search & Catalog */}
+        <div className="lg:col-span-8 space-y-4">
           <div className="rounded-2xl bg-white p-5 soft-shadow border border-gray-100">
-            <div className="flex items-center gap-2 mb-3">
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3 mb-3 px-1">
+              <div className="flex-1 min-w-[140px]">
+                <select
+                  value={filterSize}
+                  onChange={(e) => setFilterSize(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 bg-white"
+                >
+                  <option value="">All Size</option>
+                  {uniqueSizes.map((size) => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[140px]">
+                <select
+                  value={filterColor}
+                  onChange={(e) => setFilterColor(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 bg-white"
+                >
+                  <option value="">All Color</option>
+                  {uniqueColors.map((color) => (
+                    <option key={color} value={color}>{color}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[140px]">
+                <select
+                  value={filterPrice}
+                  onChange={(e) => setFilterPrice(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 bg-white"
+                >
+                  <option value="">All Price</option>
+                  <option value="under-20">Under $20</option>
+                  <option value="20-50">$20–$50</option>
+                  <option value="50-100">$50–$100</option>
+                  <option value="over-100">Over $100</option>
+                </select>
+              </div>
+              <div className="flex-1 min-w-[140px]">
+                <select
+                  value={filterGender}
+                  onChange={(e) => setFilterGender(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 bg-white"
+                >
+                  <option value="">All Gender</option>
+                  <option value="Men">Men</option>
+                  <option value="Women">Women</option>
+                </select>
+              </div>
+              {hasActiveFilter && (
+                <button
+                  onClick={() => {
+                    setFilterSize(''); setFilterColor(''); setFilterPrice(''); setFilterGender('');
+                  }}
+                  className="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:bg-red-700 transition"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-3 relative">
               <input
                 type="text"
                 placeholder="Search product or scan barcode..."
@@ -157,43 +250,69 @@ export default function Sales() {
               />
               <ShoppingCart size={16} className="absolute left-3 top-3 text-gray-400" />
             </div>
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-[420px] overflow-y-auto pr-2">
               {loading ? (
                 <div className="p-4 text-center text-gray-400">Loading products...</div>
               ) : variantOptions.length === 0 ? (
                 <div className="p-4 text-center text-gray-400">No variants available</div>
               ) : (
-                variantOptions.map((v) => (
-                  <button
-                    key={v.id}
-                    onClick={() => addToCart(v.id)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 hover:bg-red-50 hover:border-red-200 text-left text-sm transition group"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-800">{v.label}</div>
-                      <div className="text-xs text-gray-500">{v.sku}</div>
-                    </div>
-                    <span className="text-red-600 font-bold">${Number(v.selling_price).toFixed(2)}</span>
-                  </button>
-                ))
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                  {filteredVariants.map((v) => (
+                    <button
+                      key={v.id}
+                      onClick={() => addToCart(v.id)}
+                      className="flex flex-col items-center gap-2 px-2 py-2 rounded-xl border border-gray-100 bg-white hover:bg-red-50 hover:border-red-200 transition-all shadow-sm min-h-[140px]"
+                    >
+                      <div className="relative w-28 h-28 flex-shrink-0">
+                        <img
+                          src={v.imageUrl}
+                          alt={v.label}
+                          className="w-full h-full object-cover rounded-lg border border-gray-200"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&h=200&fit=crop`;
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] text-center px-1 py-0.5 rounded-bl-lg rounded-tr-lg">
+                          ${Number(v.selling_price).toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="text-[11px] font-medium text-gray-800 text-center truncate leading-tight w-full">
+                        {v.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Right: Cart */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-2xl bg-white p-5 soft-shadow border border-gray-100">
+        <div className="lg:col-span-4 space-y-4">
+          <div className="rounded-2xl bg-white p-5 soft-shadow border border-gray-100 flex flex-col h-full">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Cart ({cart.reduce((s, i) => s + i.quantity, 0)} items)</h2>
-            <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
+            <div className="space-y-2 max-h-[260px] overflow-y-auto pr-2 flex-1">
               {cart.length === 0 ? (
-                <div className="p-6 text-center text-gray-400">Empty cart</div>
+                <div className="p-6 text-center text-gray-400 flex flex-col items-center">
+                  <ShoppingCart size={32} className="text-gray-200 mb-2" />
+                  <div>Empty cart</div>
+                </div>
               ) : (
                 cart.map((item) => (
-                  <div key={item.variant_id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100">
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-800">{item.product_name}</div>
-                      <div className="text-xs text-gray-500">{item.size} / {item.color} • {item.sku}</div>
+                  <div key={item.variant_id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 border border-gray-100 min-h-[48px]">
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                      <img
+                        src={item.imageUrl || `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&h=200&fit=crop`}
+                        alt={item.product_name}
+                        className="w-full h-full object-cover rounded-md border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&h=200&fit=crop`;
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-800 truncate">{item.product_name}</div>
+                      <div className="text-xs text-gray-500 truncate">{item.size} / {item.color} • {item.sku}</div>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -214,7 +333,7 @@ export default function Sales() {
                       <div className="text-sm font-bold text-gray-800">${item.total.toFixed(2)}</div>
                       <button
                         onClick={() => removeFromCart(item.variant_id)}
-                        className="text-xs text-red-500 hover:underline"
+                        className="text-xs text-red-500 hover:underline mt-0.5"
                       >
                         Remove
                       </button>
@@ -223,7 +342,7 @@ export default function Sales() {
                 ))
               )}
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="mt-4 pt-4 border-t border-gray-100 flex-shrink-0">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium text-gray-800">${subtotal.toFixed(2)}</span>
@@ -233,56 +352,56 @@ export default function Sales() {
                 <span className="text-xl font-bold text-red-600">{totalInSelected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </div>
-          </div>
 
-          {/* Customer */}
-          <div className="rounded-2xl bg-white p-5 soft-shadow border border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">Customer (optional)</h3>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                placeholder="Search customer by name or phone..."
-                className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
-              />
-              <button onClick={() => setCustomer(null)} className="px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 transition">
-                <Users size={16} />
-              </button>
-            </div>
-            {customer && (
-              <div className="mt-2 p-2 rounded-lg bg-orange-50 border border-orange-100">
-                <div className="text-xs font-medium text-orange-800">{customer.name}</div>
-                <div className="text-xs text-orange-600">{customer.phone}</div>
-              </div>
-            )}
-          </div>
-
-          {/* Payment */}
-          <div className="rounded-2xl bg-white p-5 soft-shadow border border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">Payment</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Amount Tendered ({currency})</label>
+            {/* Customer */}
+            <div className="rounded-xl bg-gray-50 p-4 flex-shrink-0 border border-gray-100">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">Customer (optional)</h3>
+              <div className="flex items-center gap-2">
                 <input
-                  type="number"
-                  value={amountTendered}
-                  onChange={(e) => setAmountTendered(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                  type="text"
+                  placeholder="Search customer by name or phone..."
+                  className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
                 />
-              </div>
-              <div className="pt-3 border-t border-gray-100">
-                <div className="flex justify-between mb-1">
-                  <span className="text-gray-600">Change Due</span>
-                  <span className={`font-bold ${change < 0 ? 'text-red-500' : 'text-green-600'}`}>
-                    {change > 0 ? `+ ${change.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : change === 0 ? '0.00' : `Short ${Math.abs(change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                  </span>
-                </div>
-                <button
-                  onClick={handleCheckout}
-                  disabled={processing || cart.length === 0 || change < 0}
-                  className="w-full py-3 rounded-xl gradient-red-orange text-white font-medium text-lg shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 transition"
-                >
-                  {processing ? 'Processing...' : 'Complete Sale'}
+                <button onClick={() => setCustomer(null)} className="px-3 py-2 rounded-lg text-gray-500 hover:text-red-600 transition">
+                  <Users size={16} />
                 </button>
+              </div>
+              {customer && (
+                <div className="mt-2 p-2 rounded-lg bg-orange-50 border border-orange-100">
+                  <div className="text-xs font-medium text-orange-800">{customer.name}</div>
+                  <div className="text-xs text-orange-600">{customer.phone}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Payment */}
+            <div className="mt-4 rounded-xl bg-white p-4 flex-shrink-0 shadow-sm border border-gray-100">
+              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">Payment</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Amount Tendered ({currency})</label>
+                  <input
+                    type="number"
+                    value={amountTendered}
+                    onChange={(e) => setAmountTendered(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500"
+                  />
+                </div>
+                <div className="pt-3 border-t border-gray-100">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-gray-600">Change Due</span>
+                    <span className={`font-bold ${change < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                      {change > 0 ? `+ ${change.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : change === 0 ? '0.00' : `Short ${Math.abs(change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleCheckout}
+                    disabled={processing || cart.length === 0 || change < 0}
+                    className="w-full py-3 rounded-xl gradient-red-orange text-white font-medium text-lg shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 transition"
+                  >
+                    {processing ? 'Processing...' : 'Complete Sale'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -323,12 +442,12 @@ export default function Sales() {
             <span>Thank you for shopping!</span>
           </div>
           <div className="flex gap-2">
-              <button
-                onClick={() => { window.print(); setShowReceipt(false); }}
-                className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
-              >
-                Print
-              </button>
+            <button
+              onClick={() => { window.print(); setShowReceipt(false); }}
+              className="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
+            >
+              Print
+            </button>
             <button
               onClick={() => setShowReceipt(false)}
               className="flex-1 py-2.5 rounded-xl gradient-red-orange text-white font-medium hover:opacity-90 transition"

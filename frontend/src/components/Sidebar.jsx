@@ -139,7 +139,7 @@ export default function Sidebar({ active, onSelect, collapsed, onToggle }) {
     >
       <div className="flex items-center justify-between h-16 px-4 border-b border-white/60 lg:px-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl gradient-red-orange flex items-center justify-center text-white font-bold text-sm shadow-sm relative overflow-hidden">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm relative overflow-hidden">
             {!loading && avatarSrc ? (
               <img
                 src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`}
@@ -178,7 +178,7 @@ export default function Sidebar({ active, onSelect, collapsed, onToggle }) {
           <button
             key={item.key}
             onClick={() => { onSelect(item.key); if (!isDesktop) onToggle(true); }}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition cursor-pointer ${
               active === item.key
                 ? 'bg-red-600 text-white soft-shadow'
                 : 'text-gray-600 hover:bg-red-50 hover:text-red-700'

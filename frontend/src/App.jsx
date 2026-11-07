@@ -41,9 +41,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
       {!isLoggedIn ? (
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
           {authMode === 'create-account' ? (
             <CreateAccount onLogin={() => setAuthMode('login')} />
           ) : (
@@ -82,7 +82,7 @@ export default function App() {
               onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
               mobileMenuOpen={mobileMenuOpen}
             />
-            <main className="flex-1 overflow-y-auto bg-soft-orange p-6 lg:p-8">
+            <main className="flex-1 overflow-y-auto p-6 lg:p-8">
               {pageComponents[page] ?? <Dashboard />}
             </main>
           </div>

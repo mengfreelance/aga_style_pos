@@ -3,7 +3,7 @@ import { ShoppingCart, DollarSign, Users, AlertCircle, Clock, Package } from 'lu
 import api from '../services/api';
 
 const statCards = [
-  { label: 'Today Sales', value: '$0.00', icon: <DollarSign size={22} />, color: 'text-red-600', border: 'border-red-100', bg: 'bg-red-50', iconBg: 'bg-red-100' },
+  { label: 'Today Sales', value: '$0.00', icon: <DollarSign size={22} />, color: 'text-red-600', border: 'border-red-200', bg: 'bg-red-100', iconBg: 'bg-red-200' },
   { label: 'Orders', value: '0', icon: <ShoppingCart size={22} />, color: 'text-blue-600', border: 'border-blue-100', bg: 'bg-blue-50', iconBg: 'bg-blue-100' },
   { label: 'Products', value: '0', icon: <Package size={22} />, color: 'text-green-600', border: 'border-green-100', bg: 'bg-green-50', iconBg: 'bg-green-100' },
   { label: 'Customers', value: '0', icon: <Users size={22} />, color: 'text-purple-600', border: 'border-purple-100', bg: 'bg-purple-50', iconBg: 'bg-purple-100' },

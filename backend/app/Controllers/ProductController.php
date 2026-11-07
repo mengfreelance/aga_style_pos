@@ -150,6 +150,9 @@ class ProductController extends Controller
 
     private function getImageUrl(string $imagePath): string
     {
+        if (str_starts_with($imagePath, 'http://') || str_starts_with($imagePath, 'https://')) {
+            return $imagePath;
+        }
         $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'];
         return $baseUrl . '/' . $imagePath;
     }

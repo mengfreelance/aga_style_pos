@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, ShoppingCart, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, ShoppingCart, Tag, Trash } from 'lucide-react';
 import api from '../services/api';
 
 export default function Variants() {
@@ -9,6 +9,9 @@ export default function Variants() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' });
+  const [selected, setSelected] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -46,7 +49,36 @@ export default function Variants() {
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this variant?')) {
-      api.delete(`/api/variants/${id}`).then(() => window.location.reload());
+      api.delete(`/api/variants/${id}`).then(() => {
+        setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+        window.location.reload();
+      });
+    }
+  };
+
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+    setSelectAll(next.size > 0 && next.size === variants.length);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) { setSelected(new Set()); setSelectAll(false); }
+    else { setSelected(new Set(variants.map((v) => v.id))); setSelectAll(true); }
+  };
+
+  const isSelected = (id) => selected.has(id);
+
+  const handleDeleteSelected = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected variant(s)?`)) return;
+    try {
+      await Promise.all([...selected].map((id) => api.delete(`/api/variants/${id}`)));
+      setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+      window.location.reload();
+    } catch (err) {
+      alert('Failed to delete selected variants');
     }
   };
 
@@ -66,10 +98,51 @@ export default function Variants() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 soft-shadow border border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {selected.size > 0 ? (
+              <>
+                <span className="text-sm font-medium text-gray-700">{selected.size} selected</span>
+                <button
+                  onClick={() => { setSelectMode(false); setSelected(new Set()); setSelectAll(false); }}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+              >
+                Select
+              </button>
+            )}
+          </div>
+          {selected.size > 0 ? (
+            <button
+              onClick={handleDeleteSelected}
+              className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition shadow-sm"
+            >
+              <Trash size={14} /> Delete Selected
+            </button>
+          ) : null}
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100">
+                {selectMode && (
+                  <th className="pb-3 pl-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                    />
+                  </th>
+                )}
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Size</th>
@@ -81,14 +154,24 @@ export default function Variants() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={7} className="p-6 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={selectMode ? 8 : 7} className="p-6 text-center text-gray-400">Loading...</td></tr>
               ) : variants.length === 0 ? (
-                <tr><td colSpan={7} className="p-6 text-center text-gray-400">No variants yet</td></tr>
+                <tr><td colSpan={selectMode ? 8 : 7} className="p-6 text-center text-gray-400">No variants yet</td></tr>
               ) : (
                 variants.map((v) => {
                   const product = products.find((p) => p.id === v.product_id);
                   return (
-                    <tr key={v.id} className="hover:bg-red-50 transition group">
+                    <tr key={v.id} className={`hover:bg-red-50 transition group ${isSelected(v.id) ? 'bg-red-50' : ''}`}>
+                      {selectMode && (
+                        <td className="py-4 pl-4">
+                          <input
+                            type="checkbox"
+                            checked={isSelected(v.id)}
+                            onChange={() => toggleSelect(v.id)}
+                            className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                          />
+                        </td>
+                      )}
                       <td className="py-4 text-gray-800 font-medium">{product?.name ?? 'Unknown'}</td>
                       <td className="py-4 text-gray-600 font-mono text-sm">{v.sku}</td>
                       <td className="py-4 text-gray-600">{v.size}</td>

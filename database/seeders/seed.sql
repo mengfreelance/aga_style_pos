@@ -3,8 +3,8 @@
 USE stylepos_db;
 
 -- Default admin user (password: password)
-INSERT INTO users (username, email, password, name, role) VALUES
-('admin', 'admin@stylepos.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Admin', 'admin');
+INSERT INTO users (username, email, password, name, role, image) VALUES
+('admin', 'admin@stylepos.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'System Admin', 'admin', 'https://cdn-icons-png.flaticon.com/512/9187/9187532.png');
 
 -- Clothing Categories
 INSERT INTO categories (name) VALUES
@@ -14,29 +14,29 @@ INSERT INTO categories (name) VALUES
 INSERT INTO brands (name) VALUES
 ('Nike'), ('Adidas'), ('Zara'), ('H&M'), ('Uniqlo'), ('Levi\'s'), ('Gucci'), ('Prada'), ('Chanel'), ('Louis Vuitton');
 
--- Clothing Products
-INSERT INTO products (category_id, brand_id, name, description, cost_price) VALUES
-(1, 1, 'Nike Dri-FIT Cotton T-Shirt', 'Athletic cotton blend t-shirt for everyday wear', 12.00),
-(1, 4, 'H&M Classic Fit Cotton T-Shirt', 'Classic fit cotton t-shirt with crew neck', 8.00),
-(1, 5, 'Uniqlo Supima Cotton T-Shirt', 'Premium supima cotton t-shirt, soft and breathable', 15.00),
-(2, 2, 'Adidas Performance Polo', 'Moisture-wicking polo shirt for sports and casual', 18.00),
-(2, 3, 'Zara Slim Fit Polo Shirt', 'Slim fit polo shirt with contrasting collar', 22.00),
-(3, 1, 'Nike Sportswear Hoodie', 'Fleece hoodie with kangaroo pocket and drawstring hood', 35.00),
-(3, 4, 'H&M Oversized Hoodie', 'Oversized hooded sweatshirt with graphic print', 28.00),
-(4, 7, 'Gucci Leather Bomber Jacket', 'Premium leather bomber jacket with ribbed cuffs', 450.00),
-(4, 8, 'Prada Wool Blend Coat', 'Elegant wool blend coat with double-breasted closure', 520.00),
-(5, 6, 'Levi\'s 501 Original Fit Jeans', 'Classic straight-fit denim jeans with button fly', 45.00),
-(5, 1, 'Nike Tech Fleece Joggers', 'Lightweight tech fleece joggers with tapered fit', 32.00),
-(6, 9, 'Chanel Little Black Dress', 'Timeless little black dress for evening occasions', 380.00),
-(6, 3, 'Zara Floral Print Maxi Dress', 'Flowing maxi dress with floral print and v-neckline', 45.00),
-(7, 5, 'Uniqlo Denim Mini Skirt', 'High-waisted denim mini skirt with button closure', 25.00),
-(7, 4, 'H&M Pleated Skirt', 'Pleated midi skirt with elastic waistband', 20.00),
-(8, 2, 'Adidas Training Leggings', 'High-waisted training leggings with moisture-wicking fabric', 25.00),
-(8, 1, 'Nike Pro Dri-FIT Shorts', 'Compression shorts for intense workouts', 20.00),
-(9, 5, 'Uniqlo Airism Briefs', 'Breathable Airism underwear briefs, 3-pack', 15.00),
-(9, 4, 'H&M Cotton Socks', 'Soft cotton ankle socks, 5-pack', 8.00),
-(10, 3, 'Zara Leather Belt', 'Genuine leather belt with silver buckle', 18.00),
-(10, 7, 'Gucci Silk Scarf', 'Luxury silk scarf with iconic print', 85.00);
+-- Clothing Products (with Unsplash images)
+INSERT INTO products (category_id, brand_id, name, description, cost_price, image) VALUES
+(1, 1, 'Nike Dri-FIT Cotton T-Shirt', 'Athletic cotton blend t-shirt for everyday wear', 12.00, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop'),
+(1, 4, 'H&M Classic Fit Cotton T-Shirt', 'Classic fit cotton t-shirt with crew neck', 8.00, 'https://images.unsplash.com/photo-1503341514263-e2421f96637f?w=400&h=400&fit=crop'),
+(1, 5, 'Uniqlo Supima Cotton T-Shirt', 'Premium supima cotton t-shirt, soft and breathable', 15.00, 'https://images.unsplash.com/photo-1551698617-52f07174483b?w=400&h=400&fit=crop'),
+(2, 2, 'Adidas Performance Polo', 'Moisture-wicking polo shirt for sports and casual', 18.00, 'https://images.unsplash.com/photo-1583790381040-439879928171?w=400&h=400&fit=crop'),
+(2, 3, 'Zara Slim Fit Polo Shirt', 'Slim fit polo shirt with contrasting collar', 22.00, 'https://images.unsplash.com/photo-1602812937832-e7f308a93b30?w=400&h=400&fit=crop'),
+(3, 1, 'Nike Sportswear Hoodie', 'Fleece hoodie with kangaroo pocket and drawstring hood', 35.00, 'https://images.unsplash.com/photo-1556859577-4bc7994e64e5?w=400&h=400&fit=crop'),
+(3, 4, 'H&M Oversized Hoodie', 'Oversized hooded sweatshirt with graphic print', 28.00, 'https://images.unsplash.com/photo-1578136931784-bb7199587a1c?w=400&h=400&fit=crop'),
+(4, 7, 'Gucci Leather Bomber Jacket', 'Premium leather bomber jacket with ribbed cuffs', 450.00, 'https://images.unsplash.com/photo-1544965614-8027a8e8f1ac?w=400&h=400&fit=crop'),
+(4, 8, 'Prada Wool Blend Coat', 'Elegant wool blend coat with double-breasted closure', 520.00, 'https://images.unsplash.com/photo-1520879149035-5c0d096a8e3b?w=400&h=400&fit=crop'),
+(5, 6, 'Levi\'s 501 Original Fit Jeans', 'Classic straight-fit denim jeans with button fly', 45.00, 'https://images.unsplash.com/photo-1542273917363-3b182b72066f?w=400&h=400&fit=crop'),
+(5, 1, 'Nike Tech Fleece Joggers', 'Lightweight tech fleece joggers with tapered fit', 32.00, 'https://images.unsplash.com/photo-1597191667757-13701b1d6e38?w=400&h=400&fit=crop'),
+(6, 9, 'Chanel Little Black Dress', 'Timeless little black dress for evening occasions', 380.00, 'https://images.unsplash.com/photo-1566386372355-22b1309e218e?w=400&h=400&fit=crop'),
+(6, 3, 'Zara Floral Print Maxi Dress', 'Flowing maxi dress with floral print and v-neckline', 45.00, 'https://images.unsplash.com/photo-1572558167862-09e9f4118c58?w=400&h=400&fit=crop'),
+(7, 5, 'Uniqlo Denim Mini Skirt', 'High-waisted denim mini skirt with button closure', 25.00, 'https://images.unsplash.com/photo-1583497661827-12b3963e0e18?w=400&h=400&fit=crop'),
+(7, 4, 'H&M Pleated Skirt', 'Pleated midi skirt with elastic waistband', 20.00, 'https://images.unsplash.com/photo-1594638308317-0a4175405c4c?w=400&h=400&fit=crop'),
+(8, 2, 'Adidas Training Leggings', 'High-waisted training leggings with moisture-wicking fabric', 25.00, 'https://images.unsplash.com/photo-1506627017278-4b1a99415853?w=400&h=400&fit=crop'),
+(8, 1, 'Nike Pro Dri-FIT Shorts', 'Compression shorts for intense workouts', 20.00, 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&h=400&fit=crop'),
+(9, 5, 'Uniqlo Airism Briefs', 'Breathable Airism underwear briefs, 3-pack', 15.00, 'https://images.unsplash.com/photo-1599835332863-23908ab26a07?w=400&h=400&fit=crop'),
+(9, 4, 'H&M Cotton Socks', 'Soft cotton ankle socks, 5-pack', 8.00, 'https://images.unsplash.com/photo-1562526818-4650910e821e?w=400&h=400&fit=crop'),
+(10, 3, 'Zara Leather Belt', 'Genuine leather belt with silver buckle', 18.00, 'https://images.unsplash.com/photo-1602511722566-debe49386bdc?w=400&h=400&fit=crop'),
+(10, 7, 'Gucci Silk Scarf', 'Luxury silk scarf with iconic print', 85.00, 'https://images.unsplash.com/photo-1591017711289-77593bc38e2e?w=400&h=400&fit=crop');
 
 -- Product Variants (T-Shirts, Polos, Hoodies, etc.)
 INSERT INTO product_variants (product_id, sku, size, color, selling_price, stock_quantity) VALUES
@@ -155,7 +155,7 @@ INSERT INTO product_variants (product_id, sku, size, color, selling_price, stock
 
 -- Customers
 INSERT INTO customers (name, phone, email, address) VALUES
-('John Doe', '012345678', 'john@example.com', '123 Street, Phnom Penh'),
-('Jane Smith', '098765432', 'jane@example.com', '456 Road, Siem Reap'),
-('Michael Chen', '098123456', 'michael@example.com', '789 Avenue, Battambang'),
-('Sarah Johnson', '088765432', 'sarah@example.com', '321 Road, Kampot');
+('Sana', '012345678', 'john@example.com', '123 Street, Phnom Penh'),
+('Lida', '098765432', 'jane@example.com', '456 Road, Siem Reap'),
+('Kanha', '098123456', 'michael@example.com', '789 Avenue, Battambang'),
+('Tiki Tiki', '088765432', 'sarah@example.com', '321 Road, Kampot');

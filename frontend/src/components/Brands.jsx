@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Tag } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, Trash } from 'lucide-react';
 import api from '../services/api';
 
 export default function Brands() {
@@ -8,6 +8,9 @@ export default function Brands() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: '' });
+  const [selected, setSelected] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
 
   useEffect(() => {
     api.get('/api/brands').then(({ data }) => {
@@ -33,7 +36,36 @@ export default function Brands() {
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this brand?')) {
-      api.delete(`/api/brands/${id}`).then(() => window.location.reload());
+      api.delete(`/api/brands/${id}`).then(() => {
+        setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+        window.location.reload();
+      });
+    }
+  };
+
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+    setSelectAll(next.size > 0 && next.size === brands.length);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) { setSelected(new Set()); setSelectAll(false); }
+    else { setSelected(new Set(brands.map((b) => b.id))); setSelectAll(true); }
+  };
+
+  const isSelected = (id) => selected.has(id);
+
+  const handleDeleteSelected = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected brand(s)?`)) return;
+    try {
+      await Promise.all([...selected].map((id) => api.delete(`/api/brands/${id}`)));
+      setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+      window.location.reload();
+    } catch (err) {
+      alert('Failed to delete selected brands');
     }
   };
 
@@ -53,22 +85,73 @@ export default function Brands() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 soft-shadow border border-gray-100">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {selected.size > 0 ? (
+              <>
+                <span className="text-sm font-medium text-gray-700">{selected.size} selected</span>
+                <button
+                  onClick={() => { setSelectMode(false); setSelected(new Set()); setSelectAll(false); }}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+              >
+                Select
+              </button>
+            )}
+          </div>
+          {selected.size > 0 ? (
+            <button
+              onClick={handleDeleteSelected}
+              className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition shadow-sm"
+            >
+              <Trash size={14} /> Delete Selected
+            </button>
+          ) : null}
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100">
+                {selectMode && (
+                  <th className="pb-3 pl-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                    />
+                  </th>
+                )}
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Brand</th>
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={2} className="p-6 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={selectMode ? 3 : 2} className="p-6 text-center text-gray-400">Loading...</td></tr>
               ) : brands.length === 0 ? (
-                <tr><td colSpan={2} className="p-6 text-center text-gray-400">No brands yet</td></tr>
+                <tr><td colSpan={selectMode ? 3 : 2} className="p-6 text-center text-gray-400">No brands yet</td></tr>
               ) : (
                 brands.map((b) => (
-                  <tr key={b.id} className="hover:bg-red-50 transition group">
+                  <tr key={b.id} className={`hover:bg-red-50 transition group ${isSelected(b.id) ? 'bg-red-50' : ''}`}>
+                    {selectMode && (
+                      <td className="py-4 pl-4">
+                        <input
+                          type="checkbox"
+                          checked={isSelected(b.id)}
+                          onChange={() => toggleSelect(b.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                        />
+                      </td>
+                    )}
                     <td className="py-4 text-gray-800 font-medium">{b.name}</td>
                     <td className="py-4 text-right">
                       <button

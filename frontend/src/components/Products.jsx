@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, ShoppingCart, Tag, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Tag, Image as ImageIcon, Trash } from 'lucide-react';
 import api from '../services/api';
 
 const STATUS_COLORS = {
@@ -18,6 +18,9 @@ export default function Products() {
   const [form, setForm] = useState({ name: '', description: '', cost_price: '', category_id: '', brand_id: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
 
   useEffect(() => {
     api.get('/api/products').then(({ data }) => {
@@ -77,14 +80,52 @@ export default function Products() {
     }
   };
 
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelected(next);
+    setSelectAll(next.size > 0 && next.size === products.length);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelected(new Set());
+      setSelectAll(false);
+    } else {
+      setSelected(new Set(products.map((p) => p.id)));
+      setSelectAll(true);
+    }
+  };
+
+  const isSelected = (id) => selected.has(id);
+
   const handleDelete = async (id) => {
     if (window.confirm('Delete this product?')) {
       try {
         await api.delete(`/api/products/${id}`);
+        setSelected(new Set());
+        setSelectAll(false);
         window.location.reload();
       } catch (err) {
         alert('Failed to delete product');
       }
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected product(s)?`)) return;
+    try {
+      await Promise.all([...selected].map((id) => api.delete(`/api/products/${id}`)));
+      setSelected(new Set());
+      setSelectAll(false);
+      window.location.reload();
+    } catch (err) {
+      alert('Failed to delete selected products');
     }
   };
 
@@ -104,19 +145,57 @@ export default function Products() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 soft-shadow border border-gray-100 animate-fade-in">
-        <div className="flex items-center gap-2 mb-4">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="pl-10 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 w-64 transition"
-          />
-          <ShoppingCart size={16} className="absolute left-3 top-3 text-gray-400" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {selected.size > 0 ? (
+              <>
+                <span className="text-sm font-medium text-gray-700">{selected.size} selected</span>
+                <button
+                  onClick={() => { setSelectMode(false); setSelected(new Set()); setSelectAll(false); }}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+              >
+                Select
+              </button>
+            )}
+          </div>
+          {selected.size > 0 ? (
+            <button
+              onClick={handleDeleteSelected}
+              className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition shadow-sm"
+            >
+             Delete Selected
+            </button>
+          ) : (
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="pl-4 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 w-64 transition"
+            />
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-gray-100">
+                {selectMode && (
+                  <th className="pb-3 pl-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <input
+                      type="checkbox"
+                      checked={selectAll}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                    />
+                  </th>
+                )}
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
                 <th className="pb-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
@@ -127,12 +206,22 @@ export default function Products() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={6} className="p-6 text-center text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={selectMode ? 7 : 6} className="p-6 text-center text-gray-400">Loading...</td></tr>
               ) : products.length === 0 ? (
-                <tr><td colSpan={6} className="p-6 text-center text-gray-400">No products yet</td></tr>
+                <tr><td colSpan={selectMode ? 7 : 6} className="p-6 text-center text-gray-400">No products yet</td></tr>
               ) : (
                 products.map((p) => (
-                  <tr key={p.id} className="hover:bg-red-50 transition group">
+                  <tr key={p.id} className={`hover:bg-red-50 transition group ${isSelected(p.id) ? 'bg-red-50' : ''}`}>
+                    {selectMode && (
+                      <td className="py-4 pl-4">
+                        <input
+                          type="checkbox"
+                          checked={isSelected(p.id)}
+                          onChange={() => toggleSelect(p.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500 focus:ring-offset-1"
+                        />
+                      </td>
+                    )}
                     <td className="py-4">
                       {p.image_url ? (
                         <img src={p.image_url} alt={p.name} className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
