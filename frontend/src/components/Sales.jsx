@@ -145,10 +145,10 @@ export default function Sales() {
       };
       const res = await api.post('/api/sales', payload);
       setReceipt(res);
-      setShowReceipt(true);
+      window.showToast('Success', 'Sale completed', 'success');
       clearCart();
     } catch (err) {
-      alert('Checkout failed: ' + (err.response?.data?.error ?? 'Unknown error'));
+      window.showToast('Error', 'Checkout failed: ' + (err.response?.data?.error ?? 'Unknown error'), 'error');
     } finally {
       setProcessing(false);
     }
@@ -397,7 +397,7 @@ export default function Sales() {
                   <button
                     onClick={handleCheckout}
                     disabled={processing || cart.length === 0 || change < 0}
-                    className="w-full py-3 rounded-xl gradient-red-orange text-white font-medium text-lg shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 transition"
+                    className="w-full py-3 rounded-xl bg-red-600 text-white font-medium text-lg shadow-sm disabled:opacity-60 disabled:cursor-not-allowed hover:opacity-90 transition"
                   >
                     {processing ? 'Processing...' : 'Complete Sale'}
                   </button>
@@ -450,7 +450,7 @@ export default function Sales() {
             </button>
             <button
               onClick={() => setShowReceipt(false)}
-              className="flex-1 py-2.5 rounded-xl gradient-red-orange text-white font-medium hover:opacity-90 transition"
+              className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:opacity-90 transition"
             >
               Done
             </button>

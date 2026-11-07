@@ -37,12 +37,18 @@ export default function Variants() {
     if (editing) {
       api.put(`/api/variants/${editing.id}`, payload).then(() => {
         setOpen(false); setEditing(null); setForm({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' });
+        window.showToast('Success', 'Variant updated', 'success');
         window.location.reload();
+      }).catch(() => {
+        window.showToast('Error', 'Failed to update variant', 'error');
       });
     } else {
       api.post('/api/variants', payload).then(() => {
         setOpen(false); setForm({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' });
+        window.showToast('Success', 'Variant created', 'success');
         window.location.reload();
+      }).catch(() => {
+        window.showToast('Error', 'Failed to create variant', 'error');
       });
     }
   };
@@ -51,7 +57,10 @@ export default function Variants() {
     if (window.confirm('Delete this variant?')) {
       api.delete(`/api/variants/${id}`).then(() => {
         setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+        window.showToast('Success', 'Variant deleted', 'success');
         window.location.reload();
+      }).catch(() => {
+        window.showToast('Error', 'Failed to delete variant', 'error');
       });
     }
   };
@@ -76,9 +85,10 @@ export default function Variants() {
     try {
       await Promise.all([...selected].map((id) => api.delete(`/api/variants/${id}`)));
       setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+      window.showToast('Success', `${selected.size} variant(s) deleted`, 'success');
       window.location.reload();
     } catch (err) {
-      alert('Failed to delete selected variants');
+      window.showToast('Error', 'Failed to delete selected variants', 'error');
     }
   };
 
@@ -91,7 +101,7 @@ export default function Variants() {
         </div>
         <button
           onClick={() => { setEditing(null); setForm({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' }); setOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-red-orange text-white font-medium text-sm hover:opacity-90 transition shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white font-medium text-sm hover:opacity-90 transition shadow-sm"
         >
           <Plus size={18} /> Add Variant
         </button>
@@ -214,23 +224,25 @@ export default function Variants() {
 
       <div className={`fixed inset-0 z-50 ${open ? 'flex' : 'hidden'} items-center justify-center`}>
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setOpen(false)} />
-        <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 soft-shadow-lg animate-slide-up border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 soft-shadow-lg animate-slide-up border border-gray-100">
           <h2 className="text-lg font-bold text-gray-900 mb-4">{editing ? 'Edit Variant' : 'Add Variant'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
-              <select
-                required
-                value={form.product_id}
-                onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-              >
-                <option value="">Select product</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-              <ShoppingCart size={14} className="ml-2 text-gray-400" />
+              <div className="relative">
+                <select
+                  required
+                  value={form.product_id}
+                  onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition bg-white"
+                >
+                  <option value="">Select product</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                <ShoppingCart size={14} className="absolute right-3 top-3 text-gray-400" />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -293,7 +305,7 @@ export default function Variants() {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl gradient-red-orange text-white font-medium shadow-sm hover:opacity-90 transition"
+                className="px-4 py-2 rounded-xl bg-red-600 text-white font-medium shadow-sm hover:opacity-90 transition"
               >
                 {editing ? 'Update' : 'Create'}
               </button>

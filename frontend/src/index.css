@@ -73,11 +73,11 @@
 }
 
 .gradient-red-orange {
-  background: linear-gradient(135deg, rgb(var(--color-red-500)) 0%, rgb(var(--color-orange-500)) 100%);
+  background: linear-gradient(135deg, rgb(var(--color-red-500)) 0%, rgb(var(--color-red-700)) 100%);
 }
 
 .gradient-soft {
-  background: linear-gradient(135deg, rgb(var(--color-soft-red)) 0%, rgb(var(--color-soft-orange)) 100%);
+  background: linear-gradient(135deg, rgb(var(--color-soft-red)) 0%, rgb(var(--color-soft-red-dark)) 100%);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

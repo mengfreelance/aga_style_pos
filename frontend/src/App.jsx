@@ -12,6 +12,7 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Login from './components/Login';
 import CreateAccount from './components/CreateAccount';
+import Toast from './components/Toast';
 
 const pageComponents = {
   dashboard: <Dashboard />,
@@ -31,6 +32,7 @@ export default function App() {
   const [authMode, setAuthMode] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [toasts, setToasts] = useState([]);
 
   const isLoggedIn = !!localStorage.getItem('stylepos_token');
 
@@ -40,8 +42,21 @@ export default function App() {
     setAuthMode(null);
   };
 
+  const showToast = (title, message, variant = 'info', duration = 4000) => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, title, message, variant, duration }]);
+    if (duration > 0) {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, duration);
+    }
+  };
+
+  window.showToast = showToast;
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900">
+      <Toast />
       {!isLoggedIn ? (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center">
           {authMode === 'create-account' ? (

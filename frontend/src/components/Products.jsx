@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Tag, Image as ImageIcon, Trash } from 'lucide-react';
 import api from '../services/api';
+import ConfirmDialog from './ConfirmDialog';
 
 const STATUS_COLORS = {
   completed: 'bg-green-100 text-green-700',
@@ -21,6 +22,7 @@ export default function Products() {
   const [selected, setSelected] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
+  const [confirm, setConfirm] = useState(null);
 
   useEffect(() => {
     api.get('/api/products').then(({ data }) => {
@@ -74,9 +76,10 @@ export default function Products() {
       setForm({ name: '', description: '', cost_price: '', category_id: '', brand_id: '' });
       setImageFile(null);
       setImagePreview(null);
+      window.showToast('Success', editing ? 'Product updated' : 'Product created', 'success');
       window.location.reload();
     } catch (err) {
-      alert('Failed to save product: ' + err.message);
+      window.showToast('Error', 'Failed to save product', 'error');
     }
   };
 
@@ -103,30 +106,45 @@ export default function Products() {
 
   const isSelected = (id) => selected.has(id);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Delete this product?')) {
-      try {
-        await api.delete(`/api/products/${id}`);
-        setSelected(new Set());
-        setSelectAll(false);
-        window.location.reload();
-      } catch (err) {
-        alert('Failed to delete product');
-      }
-    }
+  const handleDelete = (id) => {
+    setConfirm({
+      open: true,
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete this product?',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/api/products/${id}`);
+          setSelected(new Set());
+          setSelectAll(false);
+          window.showToast('Success', 'Product deleted', 'success');
+          window.location.reload();
+        } catch (err) {
+          window.showToast('Error', 'Failed to delete product', 'error');
+        }
+      },
+    });
   };
 
   const handleDeleteSelected = async () => {
     if (selected.size === 0) return;
-    if (!window.confirm(`Delete ${selected.size} selected product(s)?`)) return;
-    try {
-      await Promise.all([...selected].map((id) => api.delete(`/api/products/${id}`)));
-      setSelected(new Set());
-      setSelectAll(false);
-      window.location.reload();
-    } catch (err) {
-      alert('Failed to delete selected products');
-    }
+    setConfirm({
+      open: true,
+      title: 'Delete Selected Products',
+      message: `Are you sure you want to delete ${selected.size} selected product(s)?`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await Promise.all([...selected].map((id) => api.delete(`/api/products/${id}`)));
+          setSelected(new Set());
+          setSelectAll(false);
+          window.showToast('Success', `${selected.size} product(s) deleted`, 'success');
+          window.location.reload();
+        } catch (err) {
+          window.showToast('Error', 'Failed to delete selected products', 'error');
+        }
+      },
+    });
   };
 
   return (
@@ -138,7 +156,7 @@ export default function Products() {
         </div>
         <button
           onClick={() => { setEditing(null); setForm({ name: '', description: '', cost_price: '', category_id: '', brand_id: '' }); setImageFile(null); setImagePreview(null); setOpen(true); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl gradient-red-orange text-white font-medium text-sm hover:opacity-90 transition shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white font-medium text-sm hover:opacity-90 transition shadow-sm"
         >
           <Plus size={18} /> Add Product
         </button>
@@ -260,18 +278,21 @@ export default function Products() {
       {/* Add/Edit Modal */}
       <div className={`fixed inset-0 z-50 ${open ? 'flex' : 'hidden'} items-center justify-center`}>
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={() => setOpen(false)} />
-        <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 soft-shadow-lg animate-slide-up border border-gray-100">
+        <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 soft-shadow-lg animate-slide-up border border-gray-100">
           <h2 className="text-lg font-bold text-gray-900 mb-4">{editing ? 'Edit Product' : 'Add Product'}</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
-              <input
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                placeholder="e.g. Cotton T-Shirt"
-              />
+              <div className="relative">
+                <Tag size={14} className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
+                  placeholder="e.g. Cotton T-Shirt"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
@@ -287,7 +308,6 @@ export default function Products() {
                     <img src={imagePreview} alt="preview" className="w-16 h-16 rounded-lg object-cover border-2 border-red-500" />
                   </div>
                 )}
-                <ImageIcon size={14} className="ml-2 text-gray-400" />
               </div>
             </div>
             <div>
@@ -338,7 +358,7 @@ export default function Products() {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl gradient-red-orange text-white font-medium shadow-sm hover:opacity-90 transition"
+                className="px-4 py-2 rounded-xl bg-red-600 text-white font-medium shadow-sm hover:opacity-90 transition"
               >
                 {editing ? 'Update' : 'Create'}
               </button>
@@ -346,6 +366,15 @@ export default function Products() {
           </form>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirm?.open}
+        title={confirm?.title ?? ''}
+        message={confirm?.message ?? ''}
+        variant={confirm?.variant ?? 'warning'}
+        onConfirm={confirm?.onConfirm}
+        onCancel={() => setConfirm(null)}
+      />
     </div>
   );
 }

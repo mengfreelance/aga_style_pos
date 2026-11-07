@@ -27,9 +27,10 @@ export default function CreateAccount({ onLogin }) {
     setError('');
     try {
       await api.post('/api/auth/register', form);
+      window.showToast('Success', 'Account created successfully', 'success');
       onLogin();
     } catch (err) {
-      setError(err.response?.data?.error ?? 'Failed to create account');
+      window.showToast('Error', 'Failed to create account: ' + (err.response?.data?.error ?? 'Unknown error'), 'error');
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ export default function CreateAccount({ onLogin }) {
             <ArrowLeft size={16} /> Back to Login
           </button>
           <div className="text-center mt-6">
-            <div className="w-14 h-14 rounded-2xl gradient-red-orange flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow-sm">
               S
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
@@ -104,7 +105,7 @@ export default function CreateAccount({ onLogin }) {
                   value={form.email}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                  placeholder="admin@stylepos.com"
+                  placeholder="youremail@gmail.com"
                 />
               </div>
             </div>
@@ -140,7 +141,7 @@ export default function CreateAccount({ onLogin }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl gradient-red-orange text-white font-medium text-lg shadow-sm hover:opacity-90 transition disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-xl bg-red-600 text-white font-medium text-lg shadow-sm hover:opacity-90 transition disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : 'Create Account'}
             </button>

@@ -66,8 +66,9 @@ export default function Settings() {
       setUser((prev) => prev ? { ...prev, name, email, image: imageFile ? imagePreview : prev.image } : null);
       setImageFile(null);
       setEditing(false);
+      window.showToast('Success', 'Profile updated', 'success');
     } catch (err) {
-      alert('Failed to update profile: ' + (err.response?.data?.error ?? 'Unknown error'));
+      window.showToast('Error', 'Failed to update profile: ' + (err.response?.data?.error ?? 'Unknown error'), 'error');
     } finally {
       setSaving(false);
     }
@@ -84,7 +85,7 @@ export default function Settings() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen text-red-600 text-center p-6">
-        <div className="max-w-md">
+        <div className="max-w-2xl">
           <h2 className="text-xl font-bold mb-2">Unable to load profile</h2>
           <p className="mb-4">{error}</p>
           <button
@@ -178,31 +179,35 @@ export default function Settings() {
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={handleNameChange}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                placeholder="Enter your name"
-              />
-              <User size={16} className="ml-2 text-gray-400" />
+              <div className="relative">
+                <User size={16} className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={handleNameChange}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
+                  placeholder="Enter your name"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                placeholder="Enter your email"
-              />
-              <Mail size={16} className="ml-2 text-gray-400" />
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
+                  placeholder="Enter your email"
+                />
+              </div>
             </div>
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 py-3 rounded-xl gradient-red-orange text-white font-medium shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition"
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white font-medium shadow-sm disabled:opacity-70 disabled:cursor-not-allowed transition"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
