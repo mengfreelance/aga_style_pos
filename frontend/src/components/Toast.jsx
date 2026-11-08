@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Info, Clock, Mail, Users, ShoppingCart, CreditCard } from 'lucide-react';
 
-const TOAST_AUTO_DISMISS = 4000;
+const TOAST_AUTO_DISMISS = 5000;
 
 const iconMap = {
   success: <CheckCircle className="w-5 h-5 text-green-600" />,

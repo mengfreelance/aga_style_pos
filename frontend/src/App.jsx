@@ -42,7 +42,7 @@ export default function App() {
     setAuthMode(null);
   };
 
-  const showToast = (title, message, variant = 'info', duration = 4000) => {
+  const showToast = (title, message, variant = 'info', duration = 5000) => {
     const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, title, message, variant, duration }]);
     if (duration > 0) {
