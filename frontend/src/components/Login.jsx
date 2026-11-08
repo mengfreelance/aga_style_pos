@@ -25,7 +25,7 @@ export default function Login({ onLogin, onCreateAccount }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 lg:px-0">
+    <div className="min-h-screen w-[500px] bg-gray-100 flex items-center justify-center px-4 lg:px-0">
       <div className="w-full lg:w-full lg:max-w-none">
         <div className="text-center mb-10 lg:mb-12">
           

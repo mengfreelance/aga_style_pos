@@ -39,23 +39,17 @@ export default function CreateAccount({ onLogin }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-soft px-4">
         <div className="w-full max-w-lg">
-        <div className="text-center mb-8">
-          <button
-            onClick={onLogin}
-            className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition"
-          >
-            <ArrowLeft size={16} /> Back to Login
-          </button>
+        <div className="text-center mb-8"S
+        >
+          
           <div className="text-center mt-6">
-            <div className="w-14 h-14 rounded-2xl bg-red-600 flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl shadow-sm">
-              S
-            </div>
+          
             <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
             <p className="text-gray-500 mt-1">Create a new admin account</p>
           </div>
         </div>
 
-        <div className="rounded-3xl bg-white p-8 soft-shadow-lg border border-gray-100 animate-fade-in">
+        <div className="rounded-3xl w-[500px] bg-white p-8 soft-shadow-lg border border-gray-100 animate-fade-in">
           {error && (
             <div className="rounded-xl p-3 bg-red-50 border border-red-100 text-red-700 text-sm mb-4">
               {error}
@@ -156,6 +150,7 @@ export default function CreateAccount({ onLogin }) {
             </button>
           </p>
         </div>
+     
       </div>
     </div>
   );
