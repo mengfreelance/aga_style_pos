@@ -26,7 +26,7 @@ export default function Login({ onLogin, onCreateAccount }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-soft px-4 lg:px-0">
-      <div className="w-full max-w-xl lg:max-w-4xl">
+      <div className="w-full lg:w-[92%] lg:max-w-none">
         <div className="text-center mb-10 lg:mb-12">
           
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">StylePOS</h1>
