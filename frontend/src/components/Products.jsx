@@ -13,6 +13,8 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -27,8 +29,13 @@ export default function Products() {
   useEffect(() => {
     api.get('/api/products').then(({ data }) => {
       setProducts(data ?? []);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    });
+    api.get('/api/categories').then(({ data }) => {
+      setCategories(data ?? []);
+    });
+    api.get('/api/brands').then(({ data }) => {
+      setBrands(data ?? []);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleImageChange = (e) => {
@@ -330,22 +337,30 @@ export default function Products() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category ID</label>
-                <input
-                  type="number"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select
                   value={form.category_id}
                   onChange={(e) => setForm({ ...form, category_id: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                />
+                >
+                  <option value="">Select category</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Brand ID</label>
-                <input
-                  type="number"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                <select
                   value={form.brand_id}
                   onChange={(e) => setForm({ ...form, brand_id: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
-                />
+                >
+                  <option value="">Select brand</option>
+                  {brands.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-4">
