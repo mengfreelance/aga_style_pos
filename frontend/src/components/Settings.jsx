@@ -102,14 +102,14 @@ export default function Settings() {
   const avatarSrc = imagePreview || (user?.image ?? null);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in p-2 lg:p-0">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-500 mt-1">Manage your profile information</p>
       </div>
 
-      <div className="max-w-2xl rounded-2xl bg-white p-6 soft-shadow border border-gray-100">
-        <div className="flex items-center justify-between mb-6">
+      <div className="rounded-2xl bg-white p-6 soft-shadow border border-gray-100 w-full">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8 gap-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Profile Information</h2>
             <p className="text-gray-500 text-sm">Manage your profile information</p>
@@ -131,53 +131,65 @@ export default function Settings() {
         </div>
 
         {/* Profile Image */}
-        <div className="flex items-center gap-6 mb-8">
-          <div className="relative">
-            {avatarSrc ? (
-              <img
-                src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover border-4 border-gray-100"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full flex items-center justify-center bg-red-50 text-red-600 border-4 border-red-100">
-                <User size={32} />
-              </div>
-            )}
-            {editing && (
-              <div className="absolute -bottom-2 -right-2">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="sr-only"
-                  />
-                  <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition shadow-sm">
-                    <Image size={16} />
-                  </div>
-                </label>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <div className="relative">
+              {avatarSrc ? (
+                <img
+                  src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`}
+                  alt="Profile"
+                  className="w-48 h-48 rounded-2xl object-cover border-4 border-gray-100 shadow-sm"
+                />
+              ) : (
+                <div className="w-48 h-48 rounded-2xl flex items-center justify-center bg-red-50 text-red-600 border-4 border-red-100 shadow-sm">
+                  <User size={48} />
+                </div>
+              )}
+              {editing && (
+                <div className="absolute -bottom-2 -right-2">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="sr-only"
+                    />
+                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition shadow-sm">
+                      <Image size={20} />
+                    </div>
+                  </label>
+                </div>
+              )}
+            </div>
+            {editing && imageFile && (
+              <button
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(user?.image ?? null);
+                }}
+                disabled={saving}
+                className="mt-4 px-4 py-2 rounded-xl border border-red-200 text-red-600 font-medium bg-red-50 hover:bg-red-100 disabled:opacity-70 transition"
+              >
+                Remove Image
+              </button>
             )}
           </div>
-          {editing && imageFile && (
-            <button
-              onClick={() => {
-                setImageFile(null);
-                setImagePreview(user?.image ?? null);
-              }}
-              disabled={saving}
-              className="px-4 py-2 rounded-xl border border-red-200 text-red-600 font-medium bg-red-50 hover:bg-red-100 disabled:opacity-70 transition"
-            >
-              Remove
-            </button>
-          )}
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <p className="text-sm font-medium text-gray-900 mb-1">Image Preview</p>
+              {avatarSrc ? (
+                <img src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`} alt="preview" className="w-full h-32 object-cover rounded-lg border border-gray-200" />
+              ) : (
+                <div className="w-full h-32 rounded-lg flex items-center justify-center bg-gray-100 border border-gray-200 text-gray-400 text-sm">No Image</div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Name & Email */}
         {editing ? (
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div>
+          <form onSubmit={handleSaveProfile} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
               <div className="relative">
                 <User size={16} className="absolute left-3 top-3 text-gray-400" />
@@ -185,12 +197,12 @@ export default function Settings() {
                   type="text"
                   value={name}
                   onChange={handleNameChange}
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
                   placeholder="Enter your name"
                 />
               </div>
             </div>
-            <div>
+            <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
@@ -198,12 +210,12 @@ export default function Settings() {
                   type="email"
                   value={email}
                   onChange={handleEmailChange}
-                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
-            <div className="flex gap-3 pt-4">
+            <div className="lg:col-span-2 flex gap-3 pt-2">
               <button
                 type="submit"
                 disabled={saving}
@@ -214,34 +226,41 @@ export default function Settings() {
             </div>
           </form>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">Full Name</span>
-              <span className="text-gray-900 font-medium">{user?.name ?? '—'}</span>
-              <User size={16} className="ml-2 text-gray-400" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+              <User size={16} className="text-gray-400" />
+              <div>
+                <span className="text-sm font-medium text-gray-700 block">Full Name</span>
+                <span className="text-gray-900 font-medium">{user?.name ?? '—'}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-gray-700">Email Address</span>
-              <span className="text-gray-900 font-medium">{user?.email ?? '—'}</span>
-              <Mail size={16} className="ml-2 text-gray-400" />
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+              <Mail size={16} className="text-gray-400" />
+              <div>
+                <span className="text-sm font-medium text-gray-700 block">Email Address</span>
+                <span className="text-gray-900 font-medium">{user?.email ?? '—'}</span>
+              </div>
             </div>
           </div>
         )}
 
         {/* Account Info */}
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <h3 className="text-sm font-bold text-gray-900 mb-3">Account Details</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Username</span>
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <User size={14} className="text-gray-500" />
+            Account Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex flex-col p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Username</span>
               <span className="font-medium text-gray-800">{user?.username ?? '—'}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Role</span>
+            <div className="flex flex-col p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Role</span>
               <span className="font-medium text-gray-800 capitalize">{user?.role ?? '—'}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">User ID</span>
+            <div className="flex flex-col p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">User ID</span>
               <span className="font-medium text-gray-800">#{user?.id ?? '—'}</span>
             </div>
           </div>
