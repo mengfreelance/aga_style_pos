@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, DollarSign, ShoppingCart, AlertCircle, Clock, FileText } from 'lucide-react';
+import { DollarSign, ShoppingCart, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
 export default function Reports() {
-  const [range, setRange] = useState('month');
   const [stats, setStats] = useState([
     { label: 'Total Revenue', value: '$0.00', icon: <DollarSign size={22} />, color: 'text-red-600' },
     { label: 'Total Orders', value: '0', icon: <ShoppingCart size={22} />, color: 'text-orange-600' },
     { label: 'Avg Order Value', value: '$0.00', icon: <DollarSign size={22} />, color: 'text-red-600' },
     { label: 'Low Stock Items', value: '0', icon: <AlertCircle size={22} />, color: 'text-orange-500' },
   ]);
-  const [chartData, setChartData] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -29,13 +24,6 @@ export default function Reports() {
         { label: 'Avg Order Value', value: (sales.length ? totalRevenue / sales.length : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: <DollarSign size={22} />, color: 'text-red-600' },
         { label: 'Low Stock Items', value: products.filter((p) => Number(p.stock_quantity ?? 0) <= 10).length.toLocaleString(), icon: <AlertCircle size={22} />, color: 'text-orange-500' },
       ]);
-
-      const daily = {};
-      sales.forEach((s) => {
-        const day = new Date(s.created_at).toLocaleDateString(undefined, { weekday: 'short' });
-        daily[day] = (daily[day] || 0) + Number(s.total_amount || 0);
-      });
-      setChartData(Object.entries(daily).map(([day, amount]) => ({ day, amount })));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -45,18 +33,6 @@ export default function Reports() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
         <p className="text-gray-500 mt-1">Sales performance and business insights</p>
-      </div>
-
-      <div className="flex items-center gap-2 mb-2">
-        {['day', 'week', 'month'].map((r) => (
-          <button
-            key={r}
-            onClick={() => setRange(r)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${range === r ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}
-          >
-            {r.charAt(0).toUpperCase() + r.slice(1)}
-          </button>
-        ))}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -71,31 +47,6 @@ export default function Reports() {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="rounded-2xl bg-white p-6 soft-shadow border border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-900">Sales Trend</h2>
-          <button className="text-sm text-red-600 font-medium hover:text-red-700">
-            <FileText size={16} className="mr-1" /> Export to CSV
-          </button>
-        </div>
-        <div className="h-80 flex items-center justify-center bg-gray-50 rounded-xl border border-gray-200 text-gray-400 relative">
-          {loading ? <div className="text-gray-400">Loading chart...</div> : null}
-          <svg className="w-full h-full" viewBox="0 0 600 300">
-            <defs>
-              <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style={{ stopColor: 'rgb(239,68,68)', stopOpacity: 0.3 }} />
-                <stop offset="100%" style={{ stopColor: 'rgb(239,68,68)', stopOpacity: 0 }} />
-              </linearGradient>
-            </defs>
-            <polyline points="50,250 100,180 150,120 200,200 250,150 300,100 350,160 400,110 450,180 500,140 550,90" fill="none" stroke="url(#grad1)" stroke-width="4" />
-            <polyline points="50,250 100,180 150,120 200,200 250,150 300,100 350,160 400,110 450,180 500,140 550,90" fill="none" stroke="rgb(239,68,68)" stroke-width="2" />
-            {chartData.map((d, i) => (
-              <circle key={d.day} cx={50 + i * 50} cy={250 - (d.amount / 1000) * 50} r="4" fill="rgb(239,68,68)" />
-            ))}
-          </svg>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
