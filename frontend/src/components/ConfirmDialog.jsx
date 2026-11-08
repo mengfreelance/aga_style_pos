@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function ConfirmDialog({
   open,
@@ -61,7 +61,7 @@ export default function ConfirmDialog({
             onClick={handleConfirm}
             className={`px-4 py-2 rounded-xl ${variantConfig[variant].btn} text-white font-medium shadow-sm transition`}
           >
-            {variant === 'danger' ? <Trash2 size={14} className="mr-1" /> : ''} Confirm
+            {variant === 'danger' ? 'Delete' : 'Confirm'}
           </button>
         </div>
         {settled && (
