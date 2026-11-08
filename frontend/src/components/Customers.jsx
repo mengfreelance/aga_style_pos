@@ -13,11 +13,13 @@ export default function Customers() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
+  const [version, setVersion] = useState(0);
 
   const fetchCustomers = () => {
     api.get('/api/customers').then(({ data }) => {
       setCustomers(data ?? []);
       setLoading(false);
+      setVersion((v) => v + 1);
     }).catch(() => setLoading(false));
   };
 
@@ -93,7 +95,7 @@ export default function Customers() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in" key={version}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>

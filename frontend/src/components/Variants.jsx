@@ -12,6 +12,7 @@ export default function Variants() {
   const [selected, setSelected] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
+  const [version, setVersion] = useState(0);
 
   const fetchData = () => {
     Promise.all([
@@ -21,6 +22,7 @@ export default function Variants() {
       setProducts(prodRes.data ?? []);
       setVariants(varRes.data ?? []);
       setLoading(false);
+      setVersion((v) => v + 1);
     }).catch(() => setLoading(false));
   };
 
@@ -97,7 +99,7 @@ export default function Variants() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in" key={version}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Product Variants</h1>

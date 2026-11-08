@@ -13,11 +13,13 @@ export default function Categories() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
+  const [version, setVersion] = useState(0);
 
   const fetchCategories = () => {
     api.get('/api/categories').then(({ data }) => {
       setCategories(data ?? []);
       setLoading(false);
+      setVersion((v) => v + 1);
     }).catch(() => setLoading(false));
   };
 
@@ -100,7 +102,7 @@ export default function Categories() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in" key={version}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Categories</h1>

@@ -21,6 +21,7 @@ export default function Products() {
   const [form, setForm] = useState({ name: '', description: '', cost_price: '', category_id: '', brand_id: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [version, setVersion] = useState(0);
   const [selected, setSelected] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -35,7 +36,10 @@ export default function Products() {
     });
     api.get('/api/brands').then(({ data }) => {
       setBrands(data ?? []);
-    }).finally(() => setLoading(false));
+    }).finally(() => {
+      setLoading(false);
+      setVersion((v) => v + 1);
+    });
   };
 
   useEffect(() => {
@@ -159,7 +163,7 @@ export default function Products() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in" key={version}>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Product Management</h1>
