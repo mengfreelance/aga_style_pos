@@ -58,6 +58,7 @@ export default function Brands() {
         try {
           await api.delete(`/api/brands/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', 'Brand deleted', 'success');
           fetchBrands();
         } catch (err) {
@@ -92,6 +93,7 @@ export default function Brands() {
         try {
           await Promise.all([...selected].map((id) => api.delete(`/api/brands/${id}`)));
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', `${selected.size} brand(s) deleted`, 'success');
           fetchBrands();
         } catch (err) {

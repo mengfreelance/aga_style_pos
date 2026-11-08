@@ -58,6 +58,7 @@ export default function Categories() {
         try {
           await api.delete(`/api/categories/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', 'Category deleted', 'success');
           fetchCategories();
         } catch (err) {
@@ -92,6 +93,7 @@ export default function Categories() {
         try {
           await Promise.all([...selected].map((id) => api.delete(`/api/categories/${id}`)));
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', `${selected.size} category(ies) deleted`, 'success');
           fetchCategories();
         } catch (err) {

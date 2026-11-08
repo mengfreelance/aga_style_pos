@@ -132,6 +132,7 @@ export default function Products() {
           await api.delete(`/api/products/${id}`);
           setSelected(new Set());
           setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', 'Product deleted', 'success');
           fetchData();
         } catch (err) {
@@ -153,6 +154,7 @@ export default function Products() {
           await Promise.all([...selected].map((id) => api.delete(`/api/products/${id}`)));
           setSelected(new Set());
           setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', `${selected.size} product(s) deleted`, 'success');
           fetchData();
         } catch (err) {

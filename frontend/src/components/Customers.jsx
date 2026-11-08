@@ -58,6 +58,7 @@ export default function Customers() {
         try {
           await api.delete(`/api/customers/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+          setConfirm(null);
           window.showToast('Success', 'Customer deleted', 'success');
           fetchCustomers();
         } catch (err) {
@@ -87,6 +88,7 @@ export default function Customers() {
     try {
       await Promise.all([...selected].map((id) => api.delete(`/api/customers/${id}`)));
       setSelected(new Set()); setSelectMode(false); setSelectAll(false);
+      setConfirm(null);
       window.showToast('Success', `${selected.size} customer(s) deleted`, 'success');
       fetchCustomers();
     } catch (err) {
