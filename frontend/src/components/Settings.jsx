@@ -100,7 +100,6 @@ export default function Settings() {
   }
 
   const avatarSrc = imagePreview || (user?.image ?? null);
-  const coverSrc = user?.cover_image ?? user?.image ?? null;
 
   return (
     <div className="space-y-6 animate-fade-in p-2 lg:p-0">
@@ -131,64 +130,49 @@ export default function Settings() {
           </button>
         </div>
 
-        {/* Cover & Profile */}
-        <div className="relative mb-8">
-          {coverSrc ? (
-            <div className="w-full h-48 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+        {/* Profile */}
+        <div className="flex justify-center mb-8">
+          <div className="relative z-10">
+            {avatarSrc ? (
               <img
-                src={typeof coverSrc === 'string' && (coverSrc.startsWith('http') || coverSrc.startsWith('blob:')) ? coverSrc : `${API_BASE}/${coverSrc.replace(/^\/+/, '')}`}
-                alt="Cover"
-                className="w-full h-full object-cover"
+                src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg bg-white"
               />
-            </div>
-          ) : (
-            <div className="w-full h-48 rounded-2xl bg-gray-100 border border-gray-100 flex items-center justify-center">
-              <span className="text-gray-400 text-sm">No cover photo</span>
-            </div>
-          )}
-          <div className="flex justify-center mt-6">
-            <div className="relative z-10">
-              {avatarSrc ? (
-                <img
-                  src={typeof avatarSrc === 'string' && (avatarSrc.startsWith('http') || avatarSrc.startsWith('blob:')) ? avatarSrc : `${API_BASE}/${avatarSrc.replace(/^\/+/, '')}`}
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg bg-white"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full flex items-center justify-center bg-red-50 text-red-600 border-4 border-white shadow-lg bg-white">
-                  <User size={40} />
-                </div>
-              )}
-              {editing && (
-                <div className="absolute -bottom-2 -right-2">
-                  <label className="cursor-pointer">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="sr-only"
-                    />
-                    <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition shadow-sm">
-                      <Image size={20} />
-                    </div>
-                  </label>
-                </div>
-              )}
-            </div>
+            ) : (
+              <div className="w-32 h-32 rounded-full flex items-center justify-center bg-red-50 text-red-600 border-4 border-white shadow-lg bg-white">
+                <User size={40} />
+              </div>
+            )}
+            {editing && (
+              <div className="absolute -bottom-2 -right-2">
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="sr-only"
+                  />
+                  <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-50 hover:text-red-600 transition shadow-sm">
+                    <Image size={20} />
+                  </div>
+                </label>
+              </div>
+            )}
           </div>
-          {editing && imageFile && (
-            <button
-              onClick={() => {
-                setImageFile(null);
-                setImagePreview(user?.image ?? null);
-              }}
-              disabled={saving}
-              className="mt-3 px-4 py-2 rounded-xl border border-red-200 text-red-600 font-medium bg-red-50 hover:bg-red-100 disabled:opacity-70 transition"
-            >
-              Remove Image
-            </button>
-          )}
         </div>
+        {editing && imageFile && (
+          <button
+            onClick={() => {
+              setImageFile(null);
+              setImagePreview(user?.image ?? null);
+            }}
+            disabled={saving}
+            className="mt-3 px-4 py-2 rounded-xl border border-red-200 text-red-600 font-medium bg-red-50 hover:bg-red-100 disabled:opacity-70 transition"
+          >
+            Remove Image
+          </button>
+        )}
 
         {/* Name & Email */}
         {editing ? (
