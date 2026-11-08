@@ -32,7 +32,6 @@ export default function App() {
   const [authMode, setAuthMode] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [toasts, setToasts] = useState([]);
 
   const isLoggedIn = !!localStorage.getItem('stylepos_token');
 
@@ -43,13 +42,7 @@ export default function App() {
   };
 
   const showToast = (title, message, variant = 'info', duration = 5000) => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, title, message, variant, duration }]);
-    if (duration > 0) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, duration);
-    }
+    window.dispatchEvent(new CustomEvent('show-toast', { detail: { title, message, variant, duration } }));
   };
 
   window.showToast = showToast;
