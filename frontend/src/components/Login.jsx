@@ -26,14 +26,14 @@ export default function Login({ onLogin, onCreateAccount }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-soft px-4 lg:px-0">
-      <div className="w-full max-w-xl lg:max-w-2xl">
+      <div className="w-full max-w-xl lg:max-w-4xl">
         <div className="text-center mb-10 lg:mb-12">
           
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">StylePOS</h1>
           <p className="text-gray-500 mt-3 text-lg">Clothing Shop Point of Sale</p>
         </div>
 
-        <div className="rounded-2xl bg-white p-10 lg:p-12 soft-shadow-xl border border-gray-100 animate-fade-in">
+        <div className="w-full rounded-2xl bg-white p-10 lg:p-12 soft-shadow-xl border border-gray-100 animate-fade-in">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Welcome back</h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
