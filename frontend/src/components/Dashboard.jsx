@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
-import { ShoppingCart, DollarSign, Users, AlertCircle, Clock, Package, TrendingUp, Activity } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, DollarSign, Users, AlertCircle, Clock, Package } from 'lucide-react';
+import { Line } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import api from '../services/api';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const statCards = [
   { label: 'Today Sales', value: '$0.00', icon: <DollarSign size={20} />, color: 'text-red-600', border: 'border-red-200', bg: 'bg-red-50', iconBg: 'bg-red-100' },
@@ -16,6 +21,7 @@ const alertCards = [
 
 export default function Dashboard() {
   const [stats, setStats] = useState(statCards);
+  const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,9 +36,63 @@ export default function Dashboard() {
         { ...prev[2], value: products.data?.length?.toLocaleString() ?? '0' },
         { ...prev[3], value: customers.data?.length?.toLocaleString() ?? '0' },
       ]);
+
+      const salesList = sales.data ?? [];
+      const daily = {};
+      salesList.forEach((s) => {
+        const day = new Date(s.created_at).toISOString().split('T')[0];
+        daily[day] = (daily[day] || 0) + Number(s.total_amount || 0);
+      });
+      const labels = Object.keys(daily).sort();
+      setChartData({
+        labels,
+        datasets: [
+          {
+            label: 'Sales ($)',
+            data: labels.map((d) => daily[d]),
+            borderColor: 'rgb(239, 68, 68)',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointBackgroundColor: 'rgb(239, 68, 68)',
+            fill: true,
+            tension: 0.4,
+          },
+        ],
+      });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: false },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => `$${value}`,
+        },
+      },
+      x: {
+        type: 'time',
+        time: {
+          unit: 'day',
+          displayFormats: {
+            day: 'MMM d',
+          },
+        },
+      },
+    },
+  };
 
   return (
     <div className="space-y-6 p-2 lg:p-0">
@@ -70,14 +130,18 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-          <div className="h-80 flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 relative overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Activity size={48} className="mx-auto mb-3 text-gray-400" />
-                <p className="text-sm text-gray-500">No sales data yet</p>
-                <p className="text-xs text-gray-400">Start selling to see your chart</p>
+          <div className="h-80 w-full rounded-xl border border-gray-200 bg-white p-4 relative overflow-hidden">
+            {chartData && chartData.labels.length > 0 ? (
+              <div className="h-full w-full">
+                <Line data={chartData} options={options} />
               </div>
-            </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center pt-20 text-gray-400">
+                <ShoppingCart size={48} className="mb-3 opacity-50" />
+                <p className="text-sm">No sales data yet</p>
+                <p className="text-xs text-gray-400 mt-1">Start selling to see your chart</p>
+              </div>
+            )}
           </div>
         </div>
 
