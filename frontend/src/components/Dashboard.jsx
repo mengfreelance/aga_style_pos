@@ -1,10 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingCart, DollarSign, Users, AlertCircle, Clock, Package } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+
+function timeAgo(dateString) {
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
 
 const statCards = [
   { label: 'Today Sales', value: '$0.00', icon: <DollarSign size={20} />, color: 'text-red-600', border: 'border-red-200', bg: 'bg-red-50', iconBg: 'bg-red-100' },
@@ -21,6 +35,7 @@ const alertCards = [
 export default function Dashboard() {
   const [stats, setStats] = useState(statCards);
   const [chartData, setChartData] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -59,6 +74,20 @@ export default function Dashboard() {
           },
         ],
       });
+
+      const customerMap = {};
+      (customers.data ?? []).forEach((c) => { customerMap[c.id] = c.name || 'Customer'; });
+
+      const activities = salesList
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 4)
+        .map((s) => ({
+          id: s.id,
+          customer: customerMap[s.customer_id] || 'Walk-in Customer',
+          amount: s.total_amount,
+          timeAgo: timeAgo(s.created_at),
+        }));
+      setRecentActivities(activities);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -175,18 +204,22 @@ export default function Dashboard() {
           <button className="text-xs font-medium text-red-600 hover:text-red-700 transition">View All</button>
         </div>
         <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-100 text-red-600 flex-shrink-0">
-                <ShoppingCart size={18} />
+          {recentActivities.length > 0 ? (
+            recentActivities.map((a) => (
+              <div key={a.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-100 text-red-600 flex-shrink-0">
+                  <ShoppingCart size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">New order #{a.id}</p>
+                  <p className="text-xs text-gray-500">{a.customer} purchased items &bull; {a.timeAgo}</p>
+                </div>
+                <span className="text-xs font-medium bg-green-100 text-green-700 px-2.5 py-0.5 rounded">Completed</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">New order #{1000 + i}</p>
-                <p className="text-xs text-gray-500">Customer purchased items &bull; {i}h ago</p>
-              </div>
-              <span className="text-xs font-medium bg-green-100 text-green-700 px-2.5 py-0.5 rounded">Completed</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="text-center text-gray-400 text-sm py-8">No recent activities</div>
+          )}
         </div>
       </div>
     </div>
