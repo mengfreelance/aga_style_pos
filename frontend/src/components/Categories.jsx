@@ -14,11 +14,15 @@ export default function Categories() {
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
-  useEffect(() => {
+  const fetchCategories = () => {
     api.get('/api/categories').then(({ data }) => {
       setCategories(data ?? []);
       setLoading(false);
     }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   const handleSubmit = (e) => {
@@ -27,7 +31,7 @@ export default function Categories() {
       api.put(`/api/categories/${editing.id}`, form).then(() => {
         setOpen(false); setEditing(null); setForm({ name: '' });
         window.showToast('Success', 'Category updated', 'success');
-        window.location.reload();
+        fetchCategories();
       }).catch(() => {
         window.showToast('Error', 'Failed to update category', 'error');
       });
@@ -35,7 +39,7 @@ export default function Categories() {
       api.post('/api/categories', form).then(() => {
         setOpen(false); setForm({ name: '' });
         window.showToast('Success', 'Category created', 'success');
-        window.location.reload();
+        fetchCategories();
       }).catch(() => {
         window.showToast('Error', 'Failed to create category', 'error');
       });
@@ -53,7 +57,7 @@ export default function Categories() {
           await api.delete(`/api/categories/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
           window.showToast('Success', 'Category deleted', 'success');
-          window.location.reload();
+          fetchCategories();
         } catch (err) {
           window.showToast('Error', 'Failed to delete category', 'error');
         }
@@ -87,7 +91,7 @@ export default function Categories() {
           await Promise.all([...selected].map((id) => api.delete(`/api/categories/${id}`)));
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
           window.showToast('Success', `${selected.size} category(ies) deleted`, 'success');
-          window.location.reload();
+          fetchCategories();
         } catch (err) {
           window.showToast('Error', 'Failed to delete selected categories', 'error');
         }

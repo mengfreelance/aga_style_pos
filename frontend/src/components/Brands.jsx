@@ -14,11 +14,15 @@ export default function Brands() {
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
-  useEffect(() => {
+  const fetchBrands = () => {
     api.get('/api/brands').then(({ data }) => {
       setBrands(data ?? []);
       setLoading(false);
     }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchBrands();
   }, []);
 
   const handleSubmit = (e) => {
@@ -27,7 +31,7 @@ export default function Brands() {
       api.put(`/api/brands/${editing.id}`, form).then(() => {
         setOpen(false); setEditing(null); setForm({ name: '' });
         window.showToast('Success', 'Brand updated', 'success');
-        window.location.reload();
+        fetchBrands();
       }).catch(() => {
         window.showToast('Error', 'Failed to update brand', 'error');
       });
@@ -35,7 +39,7 @@ export default function Brands() {
       api.post('/api/brands', form).then(() => {
         setOpen(false); setForm({ name: '' });
         window.showToast('Success', 'Brand created', 'success');
-        window.location.reload();
+        fetchBrands();
       }).catch(() => {
         window.showToast('Error', 'Failed to create brand', 'error');
       });
@@ -53,7 +57,7 @@ export default function Brands() {
           await api.delete(`/api/brands/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
           window.showToast('Success', 'Brand deleted', 'success');
-          window.location.reload();
+          fetchBrands();
         } catch (err) {
           window.showToast('Error', 'Failed to delete brand', 'error');
         }
@@ -87,7 +91,7 @@ export default function Brands() {
           await Promise.all([...selected].map((id) => api.delete(`/api/brands/${id}`)));
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
           window.showToast('Success', `${selected.size} brand(s) deleted`, 'success');
-          window.location.reload();
+          fetchBrands();
         } catch (err) {
           window.showToast('Error', 'Failed to delete selected brands', 'error');
         }

@@ -14,11 +14,15 @@ export default function Customers() {
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
-  useEffect(() => {
+  const fetchCustomers = () => {
     api.get('/api/customers').then(({ data }) => {
       setCustomers(data ?? []);
       setLoading(false);
     }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCustomers();
   }, []);
 
   const handleSubmit = (e) => {
@@ -27,7 +31,7 @@ export default function Customers() {
       api.put(`/api/customers/${editing.id}`, form).then(() => {
         setOpen(false); setEditing(null); setForm({ name: '', phone: '', email: '', address: '' });
         window.showToast('Success', 'Customer updated', 'success');
-        window.location.reload();
+        fetchCustomers();
       }).catch(() => {
         window.showToast('Error', 'Failed to update customer', 'error');
       });
@@ -35,7 +39,7 @@ export default function Customers() {
       api.post('/api/customers', form).then(() => {
         setOpen(false); setForm({ name: '', phone: '', email: '', address: '' });
         window.showToast('Success', 'Customer created', 'success');
-        window.location.reload();
+        fetchCustomers();
       }).catch(() => {
         window.showToast('Error', 'Failed to create customer', 'error');
       });
@@ -53,7 +57,7 @@ export default function Customers() {
           await api.delete(`/api/customers/${id}`);
           setSelected(new Set()); setSelectMode(false); setSelectAll(false);
           window.showToast('Success', 'Customer deleted', 'success');
-          window.location.reload();
+          fetchCustomers();
         } catch (err) {
           window.showToast('Error', 'Failed to delete customer', 'error');
         }
@@ -82,7 +86,7 @@ export default function Customers() {
       await Promise.all([...selected].map((id) => api.delete(`/api/customers/${id}`)));
       setSelected(new Set()); setSelectMode(false); setSelectAll(false);
       window.showToast('Success', `${selected.size} customer(s) deleted`, 'success');
-      window.location.reload();
+      fetchCustomers();
     } catch (err) {
       window.showToast('Error', 'Failed to delete selected customers', 'error');
     }

@@ -26,7 +26,7 @@ export default function Products() {
   const [selectMode, setSelectMode] = useState(false);
   const [confirm, setConfirm] = useState(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     api.get('/api/products').then(({ data }) => {
       setProducts(data ?? []);
     });
@@ -36,6 +36,10 @@ export default function Products() {
     api.get('/api/brands').then(({ data }) => {
       setBrands(data ?? []);
     }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const handleImageChange = (e) => {
@@ -84,7 +88,7 @@ export default function Products() {
       setImageFile(null);
       setImagePreview(null);
       window.showToast('Success', editing ? 'Product updated' : 'Product created', 'success');
-      window.location.reload();
+      fetchData();
     } catch (err) {
       window.showToast('Error', 'Failed to save product', 'error');
     }
@@ -125,7 +129,7 @@ export default function Products() {
           setSelected(new Set());
           setSelectAll(false);
           window.showToast('Success', 'Product deleted', 'success');
-          window.location.reload();
+          fetchData();
         } catch (err) {
           window.showToast('Error', 'Failed to delete product', 'error');
         }
@@ -146,7 +150,7 @@ export default function Products() {
           setSelected(new Set());
           setSelectAll(false);
           window.showToast('Success', `${selected.size} product(s) deleted`, 'success');
-          window.location.reload();
+          fetchData();
         } catch (err) {
           window.showToast('Error', 'Failed to delete selected products', 'error');
         }

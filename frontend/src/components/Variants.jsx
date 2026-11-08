@@ -13,7 +13,7 @@ export default function Variants() {
   const [selectAll, setSelectAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
 
-  useEffect(() => {
+  const fetchData = () => {
     Promise.all([
       api.get('/api/products').catch(() => ({ data: [] })),
       api.get('/api/variants').catch(() => ({ data: [] })),
@@ -22,6 +22,10 @@ export default function Variants() {
       setVariants(varRes.data ?? []);
       setLoading(false);
     }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const handleSubmit = (e) => {
@@ -38,7 +42,7 @@ export default function Variants() {
       api.put(`/api/variants/${editing.id}`, payload).then(() => {
         setOpen(false); setEditing(null); setForm({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' });
         window.showToast('Success', 'Variant updated', 'success');
-        window.location.reload();
+        fetchData();
       }).catch(() => {
         window.showToast('Error', 'Failed to update variant', 'error');
       });
@@ -46,7 +50,7 @@ export default function Variants() {
       api.post('/api/variants', payload).then(() => {
         setOpen(false); setForm({ product_id: '', sku: '', size: '', color: '', selling_price: '', stock_quantity: '' });
         window.showToast('Success', 'Variant created', 'success');
-        window.location.reload();
+        fetchData();
       }).catch(() => {
         window.showToast('Error', 'Failed to create variant', 'error');
       });
@@ -58,7 +62,7 @@ export default function Variants() {
       api.delete(`/api/variants/${id}`).then(() => {
         setSelected(new Set()); setSelectMode(false); setSelectAll(false);
         window.showToast('Success', 'Variant deleted', 'success');
-        window.location.reload();
+        fetchData();
       }).catch(() => {
         window.showToast('Error', 'Failed to delete variant', 'error');
       });
@@ -86,7 +90,7 @@ export default function Variants() {
       await Promise.all([...selected].map((id) => api.delete(`/api/variants/${id}`)));
       setSelected(new Set()); setSelectMode(false); setSelectAll(false);
       window.showToast('Success', `${selected.size} variant(s) deleted`, 'success');
-      window.location.reload();
+      fetchData();
     } catch (err) {
       window.showToast('Error', 'Failed to delete selected variants', 'error');
     }
