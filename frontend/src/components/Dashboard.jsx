@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, DollarSign, Users, AlertCircle, Clock, Package } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
-import 'chartjs-adapter-date-fns';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import api from '../services/api';
 
@@ -83,12 +82,10 @@ export default function Dashboard() {
         },
       },
       x: {
-        type: 'time',
-        time: {
-          unit: 'day',
-          displayFormats: {
-            day: 'MMM d',
-          },
+        type: 'category',
+        title: {
+          display: true,
+          text: 'Date',
         },
       },
     },
